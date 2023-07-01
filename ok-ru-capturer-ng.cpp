@@ -21,7 +21,6 @@ static size_t curl_write_func(void* buffer, size_t size, size_t nmemb, void* par
 }
 
 std::string checkerTask(std::string uid, std::vector<std::string> *vErrorList) {
-    //std::cout << uid;
     CURL* curl;
     CURLcode res;
     std::string curlData;
@@ -217,6 +216,7 @@ int main(int argc, char** argv) {
     options.add_options()
         ("d,dir", "folder for save stuff", cxxopts::value<std::string>())
         ("p,port", "port for server", cxxopts::value<int>()->default_value("34568"))
+        ("t,threads", "threads for downloader", cxxopts::value<int>()->default_value("4"))
         ("h,help", "Print usage")
         ("v,version", "Print version")
         ;
@@ -233,8 +233,8 @@ int main(int argc, char** argv) {
     }
 
     data.WorkingDir = result["d"].as<std::string>();
-    if (data.WorkingDir.back() != '\\') {
-        data.WorkingDir += "\\";
+    if (data.WorkingDir.back() != '/') {
+        data.WorkingDir += "/";
     }
 
     data.load();
@@ -244,7 +244,7 @@ int main(int argc, char** argv) {
 
     while (!svr.is_running()) { std::this_thread::sleep_for(std::chrono::milliseconds(300)); }
 
-    dp::thread_pool checkerTaskPool(2);
+    dp::thread_pool checkerTaskPool(result["t"].as<int>());
 
     std::vector<std::future<std::string>> VIDDownloaderTasks;
 
