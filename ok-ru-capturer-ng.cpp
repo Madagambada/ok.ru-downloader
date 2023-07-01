@@ -205,7 +205,7 @@ void srvStart(base *data, int port) {
         res.set_content(dat, "text/plain");
         });
 
-    svr.listen("127.0.0.1", port);
+    svr.listen("0.0.0.0", port);
 }
 
 int main(int argc, char** argv) {
