@@ -21,6 +21,7 @@ static size_t curl_write_func(void* buffer, size_t size, size_t nmemb, void* par
 }
 
 std::string checkerTask(std::string uid, std::vector<std::string> *vErrorList) {
+    //std::cout << uid;
     CURL* curl;
     CURLcode res;
     std::string curlData;
@@ -114,15 +115,13 @@ void srvStart(base *data, int port) {
             }
 
             if (strutil::contains(tmpResult, "offline-")) {
-                data->UserIDList.push_back(msg);
-                data->save();
+                data->toAdd.push_back(msg);
                 res.set_content("\"" + msg + "\"" + " added to the database.", "text/plain");
                 return;
             }
 
             if (strutil::contains(tmpResult, "live-")) {
-                data->UserIDList.push_back(msg);
-                data->save();
+                data->toAdd.push_back(msg);
                 res.set_content("\"" + msg + "\"" + " added to the database and will shortly be downloaded.", "text/plain");
                 return;
             }
@@ -304,13 +303,22 @@ int main(int argc, char** argv) {
         }
 
         for (int i = 0; i < data.toRemove.size(); i++) {
-            for (int i = 0; i < data.UserIDList.size(); i++) {
-                if (data.UserIDList[i] == data.toRemove[i]) {
-                    data.UserIDList.erase(data.UserIDList.begin() + i);
+            for (int o = 0; o < data.UserIDList.size(); o++) {
+                if (data.UserIDList[o] == data.toRemove[i]) {
+                    data.UserIDList.erase(data.UserIDList.begin() + o);
+                    data.toRemove.erase(data.toRemove.begin() + i);
                     data.save();
                     break;
                 }
             }
+        }
+
+        if (!data.toAdd.empty()) {
+            while (!data.toAdd.empty()) {
+                data.UserIDList.push_back(data.toAdd[0]);
+                data.toAdd.erase(data.toAdd.begin());
+            }
+            data.save();
         }
 
 

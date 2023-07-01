@@ -12,6 +12,7 @@ public:
     std::vector<std::string> _vVideoID;
     std::vector<std::string> _todownload;
     std::vector<std::string> toRemove;
+    std::vector<std::string> toAdd;
     std::vector<std::string> VidIDDownloading;
     std::string WorkingDir;
     std::string name = "OK.ru capture";
@@ -22,7 +23,7 @@ private:
 
 bool base::load() {
     std::string line;
-    std::ifstream file("ok-user.list");
+    std::ifstream file(WorkingDir + "ok-user.list");
     if (file.is_open()) {
         while (std::getline(file, line)) {
             UserIDList.push_back(line);
@@ -34,7 +35,7 @@ bool base::load() {
 }
 
 bool base::save() {
-    std::ofstream file("ok-user.list");
+    std::ofstream file(WorkingDir + "ok-user.list");
     if (file.is_open()) {
         for (int i = 0; i < UserIDList.size(); i++) {
             file << UserIDList[i];
@@ -47,4 +48,3 @@ bool base::save() {
     }
     return 1;
 }
-
