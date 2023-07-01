@@ -115,12 +115,14 @@ void srvStart(base *data, int port) {
 
             if (strutil::contains(tmpResult, "offline-")) {
                 data->UserIDList.push_back(msg);
+                data->save();
                 res.set_content("\"" + msg + "\"" + " added to the database.", "text/plain");
                 return;
             }
 
             if (strutil::contains(tmpResult, "live-")) {
                 data->UserIDList.push_back(msg);
+                data->save();
                 res.set_content("\"" + msg + "\"" + " added to the database and will shortly be downloaded.", "text/plain");
                 return;
             }
