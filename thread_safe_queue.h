@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <concepts>
 #include <deque>
 #include <mutex>
@@ -13,7 +14,7 @@ namespace dp {
      * https://en.cppreference.com/w/cpp/named_req/BasicLockable for details.
      */
     template <typename Lock>
-    concept is_lockable = requires(Lock && lock) {
+    concept is_lockable = requires(Lock&& lock) {
         lock.lock();
         lock.unlock();
         { lock.try_lock() } -> std::convertible_to<bool>;
@@ -22,24 +23,29 @@ namespace dp {
     template <typename T, typename Lock = std::mutex>
         requires is_lockable<Lock>
     class thread_safe_queue {
-    public:
+      public:
         using value_type = T;
         using size_type = typename std::deque<T>::size_type;
 
         thread_safe_queue() = default;
 
-        void push(T&& value) {
-            std::lock_guard lock(mutex_);
+        void push_back(T&& value) {
+            std::scoped_lock lock(mutex_);
             data_.push_back(std::forward<T>(value));
         }
 
+        void push_front(T&& value) {
+            std::scoped_lock lock(mutex_);
+            data_.push_front(std::forward<T>(value));
+        }
+
         [[nodiscard]] bool empty() const {
-            std::lock_guard lock(mutex_);
+            std::scoped_lock lock(mutex_);
             return data_.empty();
         }
 
-        [[nodiscard]] std::optional<T> pop() {
-            std::lock_guard lock(mutex_);
+        [[nodiscard]] std::optional<T> pop_front() {
+            std::scoped_lock lock(mutex_);
             if (data_.empty()) return std::nullopt;
 
             auto front = std::move(data_.front());
@@ -47,8 +53,8 @@ namespace dp {
             return front;
         }
 
-        [[nodiscard]] std::optional<T> steal() {
-            std::lock_guard lock(mutex_);
+        [[nodiscard]] std::optional<T> pop_back() {
+            std::scoped_lock lock(mutex_);
             if (data_.empty()) return std::nullopt;
 
             auto back = std::move(data_.back());
@@ -56,7 +62,40 @@ namespace dp {
             return back;
         }
 
-    private:
+        [[nodiscard]] std::optional<T> steal() {
+            std::scoped_lock lock(mutex_);
+            if (data_.empty()) return std::nullopt;
+
+            auto back = std::move(data_.back());
+            data_.pop_back();
+            return back;
+        }
+
+        void rotate_to_front(const T& item) {
+            std::scoped_lock lock(mutex_);
+            auto iter = std::find(data_.begin(), data_.end(), item);
+
+            if (iter != data_.end()) {
+                std::ignore = data_.erase(iter);
+            }
+
+            data_.push_front(item);
+        }
+
+        [[nodiscard]] std::optional<T> copy_front_and_rotate_to_back() {
+            std::scoped_lock lock(mutex_);
+
+            if (data_.empty()) return std::nullopt;
+
+            auto front = data_.front();
+            data_.pop_front();
+
+            data_.push_back(front);
+
+            return front;
+        }
+
+      private:
         std::deque<T> data_{};
         mutable Lock mutex_{};
     };

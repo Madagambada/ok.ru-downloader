@@ -3,9 +3,9 @@ echo "x64 dependencies builder 1.0.0"
 
 zlibArchive='https://github.com/madler/zlib/releases/download/v1.2.13/zlib-1.2.13.tar.xz'
 caresArchive='https://github.com/c-ares/c-ares/releases/download/cares-1_19_1/c-ares-1.19.1.tar.gz'
-mbedtlsArchive='https://github.com/Mbed-TLS/mbedtls/archive/refs/tags/v3.4.0.tar.gz'
-nghttp2Archive='https://github.com/nghttp2/nghttp2/releases/download/v1.54.0/nghttp2-1.54.0.tar.xz'
-curlArchive='https://github.com/curl/curl/releases/download/curl-8_1_2/curl-8.1.2.tar.xz'
+mbedtlsArchive='https://github.com/Mbed-TLS/mbedtls/archive/refs/tags/v3.4.1.tar.gz'
+nghttp2Archive='https://github.com/nghttp2/nghttp2/releases/download/v1.55.1/nghttp2-1.55.1.tar.xz'
+curlArchive='https://github.com/curl/curl/releases/download/curl-8_2_1/curl-8.2.1.tar.xz'
 
 echo -n "Install tools... "
 sudo apt update && sudo apt install lsb-release pkg-config wget software-properties-common gnupg git tar xz-utils curl cmake make autoconf libtool -y
